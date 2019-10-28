@@ -1,0 +1,5 @@
+micronaut:
+  application:
+        name: smart-ac
+  config-client:
+    enabled: true
