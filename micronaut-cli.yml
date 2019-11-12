@@ -1,5 +1,5 @@
 profile: service
-defaultPackage: smart.ac
+defaultPackage: smartAc
 ---
 testFramework: junit
 sourceLanguage: java

@@ -1,11 +1,12 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "smart-ac"
+  name: "smart-ac-deployment"
 spec:
   selector:
     matchLabels:
       app: "smart-ac"
+  replicas: 1
   template:
     metadata:
       labels:
@@ -13,28 +14,30 @@ spec:
     spec:
       containers:
         - name: "smart-ac"
-          image: "gcr.io/smart-ac/jib-image"
+          image: "docker.io/jackchervet/smart-ac:latest"
           ports:
             - name: http
               containerPort: 8080
           readinessProbe:
             httpGet:
-              path: /health
+              path: /healthy/ready
               port: 8080
             initialDelaySeconds: 5
             timeoutSeconds: 3
           livenessProbe:
             httpGet:
-              path: /health
+              path: /healthy/live
               port: 8080
             initialDelaySeconds: 5
             timeoutSeconds: 3
             failureThreshold: 10
+      imagePullSecrets:
+        - name: regcred
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: "smart-ac"
+  name: "smart-ac-service"
 spec:
   selector:
     app: "smart-ac"

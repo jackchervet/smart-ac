@@ -8,7 +8,7 @@ plugins {
 
 
 version "0.1"
-group "smart.ac"
+group "smartAc"
 
 repositories {
     mavenCentral()
@@ -21,6 +21,8 @@ configurations {
 }
 
 dependencies {
+    compile 'io.micronaut:micronaut-views'
+    compile "io.micronaut:micronaut-security"
     annotationProcessor platform("io.micronaut:micronaut-bom:$micronautVersion")
     annotationProcessor "io.micronaut:micronaut-inject-java"
     annotationProcessor "io.micronaut:micronaut-validation"
@@ -44,7 +46,7 @@ dependencies {
 
 test.classpath += configurations.developmentOnly
 
-mainClassName = "smart.ac.Application"
+mainClassName = "smartAc.Application"
 // use JUnit 5 platform
 test {
     useJUnitPlatform()
