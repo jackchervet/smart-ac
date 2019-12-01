@@ -11,10 +11,15 @@ import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.http.client.RxHttpClient;
 import io.micronaut.http.HttpRequest;
 import io.micronaut.test.annotation.MicronautTest;
+import smartAc.models.GoogleWebhookRequest;
+import smartAc.models.GoogleWebhookRequest.QueryResult;
 
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 @MicronautTest
 class MessageControllerTest {
@@ -44,8 +49,18 @@ class MessageControllerTest {
     }
 
     @Test
+    public void setState_testInvalidJson() {
+        HttpRequest request = HttpRequest.POST("/setState", "{\"paramters\":\"aaa\"")
+            .basicAuth(user, pass);
+        assertThrows(HttpClientResponseException.class, () ->
+                client.toBlocking().exchange(request, String.class),
+            "[ERROR]: Bad Webhook request.");
+    }
+
+    @Test
     public void setState_testInvalidState() {
-        HttpRequest request = HttpRequest.POST("/setState", "{\"state\":\"low\"}")
+        GoogleWebhookRequest req = buildWebhookRequest("low");
+        HttpRequest request = HttpRequest.POST("/setState", new Gson().toJson(req))
             .basicAuth(user, pass);
         assertThrows(HttpClientResponseException.class, () ->
             client.toBlocking().exchange(request, String.class),
@@ -54,7 +69,8 @@ class MessageControllerTest {
 
     @Test
     public void setState_testValidState() {
-        HttpRequest request = HttpRequest.POST("/setState", "{\"state\":\"on\"}")
+        GoogleWebhookRequest req = buildWebhookRequest("on");
+        HttpRequest request = HttpRequest.POST("/setState", new Gson().toJson(req))
             .basicAuth(user, pass);
         HttpResponse rsp = client.toBlocking().exchange(request, String.class);
         assertEquals(HttpStatus.OK, rsp.getStatus());
@@ -67,5 +83,17 @@ class MessageControllerTest {
             .basicAuth(user, pass);
         HttpResponse rsp = client.toBlocking().exchange(request, String.class);
         assertEquals(HttpStatus.OK, rsp.getStatus());
+    }
+
+    private static GoogleWebhookRequest buildWebhookRequest(String state) {
+        JsonObject parameters = new JsonObject();
+        parameters.addProperty("state", state);
+        return new GoogleWebhookRequest.Builder()
+            .setResponseId("123")
+            .setQueryResult(new QueryResult.Builder()
+                .setQueryText("abc")
+                .setParameters(parameters)
+                .build())
+            .build();
     }
 }
